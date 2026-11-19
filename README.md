@@ -26,7 +26,7 @@ Coverage is 46 of 46 entries. The organizer supplied the plain-text export for J
 
 ## Local leaderboard
 
-The site is published at https://mejosh.github.io/pauper-unwrapped/ using GitHub Pages from the root of `main`. Rebuild the generated HTML before committing changes; pushing to `main` publishes the updated files. `index.html` opens the leaderboard, and `.nojekyll` keeps the site served as static files.
+The site is published at https://joshelliott.me/pauper-unwrapped/ using GitHub Pages from the root of `main`. Rebuild the generated HTML before committing changes; pushing to `main` publishes the updated files. `index.html` opens the leaderboard, and `.nojekyll` keeps the site served as static files.
 
 Every player profile includes a **Matchups** chart. All players appear along the X axis in season rank order, including players not yet faced and the profile player, whose empty column is highlighted and marked “You”. The **Show self** checkbox above the chart is checked by default; uncheck it to hide that column. One box represents each reported head-to-head match, stacked vertically from oldest at the bottom to newest at the top, with the score from the profile owner's perspective: muted green for 2–1 or 1–0 wins, saturated green for 2–0 wins, saturated red for 0–2 losses, muted red for 1–2 or 0–1 losses, and grey for draws. Hover or keyboard-focus a box for its event, date, and round. Byes and incomplete events are excluded.
 
