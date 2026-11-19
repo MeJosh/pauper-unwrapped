@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pauper Unwrapped · League leaderboard</title>
+<style>
+__STYLES__
+</style>
+</head>
+<body>
+<main>
+<nav aria-label="League pages" class="profile-nav"><a href="cards.html">Card popularity →</a></nav>
+<header><div class="eyebrow">Pauper Unwrapped / 2026 league</div><h1>The league leaderboard</h1><p>A season of commons. A record worth keeping.</p><div id="summary" class="summary"></div></header>
+<section aria-labelledby="standings-title"><div class="toolbar"><h2 id="standings-title">Season standings</h2><label for="search">Find a player<input type="search" id="search" placeholder="Player name…"></label></div>
+<div class="table-wrap"><table id="leaderboard"><caption class="note" style="text-align:left;padding:12px 18px">Ranked by season match points. Select a player to explore their season.</caption><thead><tr>
+<th scope="col">Rank</th><th scope="col"><button data-sort="name">Player</button></th><th scope="col" aria-sort="descending"><button data-sort="points">Points</button></th><th scope="col"><button data-sort="events">Events</button></th><th scope="col"><button data-sort="matchRecord">Match record</button></th><th scope="col"><button data-sort="gameRecord">Game record</button></th><th scope="col"><button data-sort="matchWinRate">Match win%</button></th><th scope="col"><button data-sort="gameWinRate">Game win%</button></th>
+</tr></thead><tbody id="rows"></tbody></table></div><p class="note" id="results" aria-live="polite"></p><p class="note">🏆 Marks a 3–0 event; (x2) means two perfect finishes. Records are wins–losses–draws. Rank always shows the season points ranking.</p>
+</section>
+<details class="rules"><summary>How the leaderboard works</summary><p><strong>Season match points:</strong> 3 per match win, 1 per draw, 0 per loss, across completed events. This rewards both results and participation across the league. Ties are broken by match win percentage, then game win percentage; players still tied share a rank.</p><p><strong>Win percentages:</strong> wins divided by all matches or games, including draws in the denominator. Draws earn match points but do not count as wins. Byes count as awarded wins and game scores, matching the source standings. Sort by a win percentage to compare efficiency across different attendance totals.</p><p><strong>Trophies:</strong> exactly 3 wins, 0 losses, and 0 draws in a completed event, including awarded byes. A first-place finish with a different record does not earn a trophy.</p></details>
+<footer>Built from the local league export · <span id="dates"></span> · Completed events only</footer>
+</main>
+
+<script id="league-data" type="application/json">__LEAGUE_DATA__</script>
+<script>
+const players=JSON.parse(document.getElementById('league-data').textContent);
+const $=id=>document.getElementById(id);
+const escapeHtml=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const record=value=>value.join('–');
+const pct=value=>(value*100).toFixed(1)+'%';
+const date=value=>new Date(value+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const trophy=label=>`<span class="trophy" role="img" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10v3h4v4a5 5 0 0 1-5 5h-.1a5 5 0 0 1-2.9 1.9V19h4v3H7v-3h4v-3.1A5 5 0 0 1 8.1 14H8a5 5 0 0 1-5-5V5h4V2Zm0 5H5v2a3 3 0 0 0 2.1 2.9A5 5 0 0 1 7 11V7Zm10 0v4c0 .3 0 .6-.1.9A3 3 0 0 0 19 9V7h-2Z"/></svg></span>`;
+const events=[...new Map(players.flatMap(p=>p.events).map(e=>[e.id,e])).values()].sort((a,b)=>a.date.localeCompare(b.date));
+$('summary').innerHTML=[[events.length,'completed events'],[players.length,'players'],[players.reduce((sum,p)=>sum+p.trophies,0),'perfect finishes']].map(([n,label])=>`<div class="stat"><strong>${n}</strong><span>${label}</span></div>`).join('');
+$('dates').textContent=events.length?`${date(events[0].date)} – ${date(events.at(-1).date)}`:'No completed events';
+let sortKey='points',direction=-1;
+function sortValue(p,key){return key==='events'?p.events.length:key==='matchRecord'||key==='gameRecord'?p[key][0]:p[key]}
+function render(){
+ const query=$('search').value.trim().toLowerCase();
+ const shown=players.filter(p=>p.name.toLowerCase().includes(query)).sort((a,b)=>{
+  const av=sortValue(a,sortKey),bv=sortValue(b,sortKey);
+  return direction*(typeof av==='string'?av.localeCompare(bv):av-bv)||a.rank-b.rank||a.name.localeCompare(b.name);
+ });
+ $('rows').innerHTML=shown.map(p=>`<tr><td class="rank">${p.rank}</td><td><a class="player" href="players/${p.id}.html">${escapeHtml(p.name)}</a><span class="trophies">${p.trophies?trophy(p.events.filter(e=>e.trophy).map(e=>`3–0 · ${date(e.date)} · ${e.archetype}`).join('; '))+(p.trophies>1?`<span>(x${p.trophies})</span>`:''):''}</span></td><td class="points">${p.points}</td><td>${p.events.length}</td><td>${record(p.matchRecord)}</td><td>${record(p.gameRecord)}</td><td>${pct(p.matchWinRate)}</td><td>${pct(p.gameWinRate)}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">No players found.</td></tr>';
+ $('results').textContent=`${shown.length} of ${players.length} players`;
+}
+$('search').addEventListener('input',render);
+document.querySelectorAll('[data-sort]').forEach(button=>button.addEventListener('click',()=>{
+ const key=button.dataset.sort;direction=key===sortKey?-direction:key==='name'?1:-1;sortKey=key;
+ document.querySelectorAll('#leaderboard th').forEach(th=>th.removeAttribute('aria-sort'));
+ button.closest('th').setAttribute('aria-sort',direction===1?'ascending':'descending');render();
+}));
+render();
+</script>
+</body>
+</html>

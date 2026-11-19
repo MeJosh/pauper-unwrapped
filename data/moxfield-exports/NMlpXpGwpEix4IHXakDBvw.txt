@@ -1,0 +1,27 @@
+2 Archaeomancer
+3 Azorius Chancery
+3 Contaminated Landscape
+3 Ephemerate
+2 Ghostly Flicker
+1 Glacial Floodplain
+3 God-Pharaoh's Faithful
+9 Island
+4 Lórien Revealed
+1 Meeting of Minds
+4 Mulldrifter
+3 Murmuring Mystic
+3 Negate
+2 Plains
+4 Preordain
+2 Prohibit
+3 Sea Gate Oracle
+4 Snap
+4 Sunscape Familiar
+
+SIDEBOARD:
+4 Hydroblast
+3 Relic of Progenitus
+2 Revoke Existence
+2 Spreading Seas
+2 Standard Bearer
+2 Stonehorn Dignitary

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card popularity · Pauper Unwrapped</title>
+<style>__STYLES__</style>
+</head>
+<body>
+<main>
+<nav aria-label="League pages"><a href="__LEADERBOARD_URL__">← League leaderboard</a></nav>
+<header>
+<div class="eyebrow" style="margin-top:28px">Pauper Unwrapped / 2026 league</div>
+<h1>The cards we played</h1>
+<p>A league-wide look at the commons that kept showing up.</p>
+<div id="summary" class="summary"></div>
+<p id="coverage" class="note"></p>
+</header>
+<section aria-labelledby="cards-title">
+<div class="toolbar"><h2 id="cards-title">Card popularity</h2><label for="search">Find a card<input type="search" id="search" placeholder="Card name…"></label></div>
+<div class="card-filters">
+<label for="board">Count cards in <select id="board"><option value="all">Entire deck</option><option value="mainboard">Main deck</option><option value="sideboard">Sideboard</option></select></label>
+<label class="checkbox-label"><input type="checkbox" id="basics"> Include basic lands</label>
+</div>
+<div class="view-switch" role="group" aria-label="Card display">
+<button type="button" id="table-view" aria-pressed="true" aria-controls="table-panel">Table</button>
+<button type="button" id="cloud-view" aria-pressed="false" aria-controls="cloud-panel">Card cloud</button>
+</div>
+<div id="cloud-panel" hidden>
+<div class="cloud-toolbar"><p class="note">Larger cards mean more total copies. Hover or focus for counts; select a card to open it on Scryfall.</p><label for="cloud-limit">Show <select id="cloud-limit"><option value="60">Top 60 cards</option><option value="30">Top 30 cards</option><option value="all">All cards</option></select></label></div>
+<div id="cloud" class="card-cloud"></div>
+<p id="cloud-detail" class="note" aria-live="polite"></p>
+<p class="note">Card images courtesy of <a href="https://scryfall.com">Scryfall</a>. Magic: The Gathering card imagery © Wizards of the Coast. Images show representative printings, not necessarily the editions registered.</p>
+</div>
+<div id="table-panel" class="table-wrap"><table id="cards">
+<caption class="note" id="caption" style="text-align:left;padding:12px 18px"></caption>
+<thead><tr>
+<th scope="col">Rank</th><th scope="col"><button data-sort="card">Card</button></th><th scope="col" aria-sort="descending"><button data-sort="decks">Decks</button></th><th scope="col"><button data-sort="share">Deck share</button></th><th scope="col"><button data-sort="copies">Total copies</button></th><th scope="col"><button data-sort="average">Copies / using deck</button></th>
+</tr></thead><tbody id="rows"></tbody>
+</table></div>
+<p class="note" id="results" aria-live="polite"></p>
+</section>
+<details class="rules"><summary>How card popularity works</summary>
+<p><strong>Decks:</strong> captured event entries containing a card. A player registering the same list at two events counts as two entries. In the entire-deck view, a card present in both boards counts as one deck; its copies are added together.</p>
+<p><strong>Deck share:</strong> decks containing the card divided by all captured entries from completed events, including entries with empty sideboards. <strong>Copies / using deck:</strong> total copies divided by decks containing the card in the selected board.</p>
+<p><strong>Rank:</strong> based on deck count in the selected view, with tied counts sharing a rank. Sorting or searching does not change those ranks. Basic lands, including snow-covered basics and Wastes, are hidden by default.</p>
+<p><strong>Card cloud:</strong> cards are selected by total copies, with alphabetical ordering for ties at the cutoff. Image area is proportional to total copies: a card with four times as many copies has twice the width and height. Images use representative printings from Scryfall; double-faced cards show the front face. Use “All cards” to include every matching card.</p>
+<p>These statistics describe registered decklists, rather than cards drawn or cast in matches. Captured Moxfield lists may have been edited after the events. Missing lists are excluded from card counts and the deck-share denominator.</p>
+</details>
+<footer>Built from local decklist captures · <span id="dates"></span> · Completed events only</footer>
+<noscript><p>Enable JavaScript to explore the card rankings.</p></noscript>
+</main>
+<script id="card-data" type="application/json">__CARD_DATA__</script>
+<script>
+__CLOUD_SCRIPT__
+const data=JSON.parse(document.getElementById('card-data').textContent);
+const $=id=>document.getElementById(id);
+const escapeHtml=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const basics=new Set(data.basics), total=data.coverage.captured;
+const date=value=>new Date(value+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+$('coverage').textContent=`Decklist coverage: ${total} of ${data.coverage.entries} event entries captured.${data.coverage.missing.length?' Missing lists are excluded from the rankings.':''}`;
+$('dates').textContent=data.events.length?`${date(data.events[0].date)} – ${date(data.events.at(-1).date)}`:'No completed events';
+let sortKey='decks', direction=-1;
+let view='table', cloudCards=[];
+function renderCloud(){
+ if(view==='cloud')renderCardCloud(cloudCards,$('cloud-limit').value,$('cloud'),$('cloud-detail'),data.images);
+}
+function render(){
+ const board=$('board').value, includeBasics=$('basics').checked, query=$('search').value.trim().toLowerCase();
+ const cards=data.boards[board].filter(c=>includeBasics||!basics.has(c.card));
+ let previousCount=null, rank=0;
+ const ranked=cards.map((c,i)=>{
+  if(c.decks!==previousCount)rank=i+1;
+  previousCount=c.decks;
+  return {...c,rank,share:total?c.decks/total:0,average:c.copies/c.decks};
+ });
+ const shown=ranked.filter(c=>c.card.toLowerCase().includes(query)).sort((a,b)=>{
+  const av=a[sortKey],bv=b[sortKey];
+  return direction*(typeof av==='string'?av.localeCompare(bv):av-bv)||a.card.localeCompare(b.card);
+ });
+ $('summary').innerHTML=[[total,'captured decks'],[cards.length,includeBasics?'distinct cards':'distinct nonbasic cards'],[cards.reduce((n,c)=>n+c.copies,0),'copies in selected view']].map(([n,label])=>`<div class="stat"><strong>${n.toLocaleString()}</strong><span>${label}</span></div>`).join('');
+ const boardLabel={all:'Entire deck',mainboard:'Main deck',sideboard:'Sideboard'}[board];
+ $('caption').textContent=`${boardLabel} · ${includeBasics?'Basic lands included':'Basic lands excluded'} · Deck share is out of ${total} captured decks.`;
+ $('rows').innerHTML=shown.map(c=>`<tr><td class="rank">${c.rank}</td><td><strong>${escapeHtml(c.card)}</strong></td><td class="points">${c.decks}</td><td><span class="share-track" aria-hidden="true"><span style="width:${c.share*100}%"></span></span>${(c.share*100).toFixed(1)}%</td><td>${c.copies}</td><td>${c.average.toFixed(2)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No cards found.</td></tr>';
+ $('results').textContent=`${shown.length} of ${cards.length} cards · ${boardLabel.toLowerCase()}`;
+ cloudCards=shown;
+ renderCloud();
+}
+function setView(next){
+ view=next;
+ $('table-panel').hidden=view!=='table';
+ $('cloud-panel').hidden=view!=='cloud';
+ $('table-view').setAttribute('aria-pressed',String(view==='table'));
+ $('cloud-view').setAttribute('aria-pressed',String(view==='cloud'));
+ renderCloud();
+}
+$('table-view').addEventListener('click',()=>setView('table'));
+$('cloud-view').addEventListener('click',()=>setView('cloud'));
+$('cloud-limit').addEventListener('change',renderCloud);
+let cloudWidth=0;
+new ResizeObserver(entries=>{
+ const width=Math.round(entries[0].contentRect.width);
+ if(width!==cloudWidth){cloudWidth=width;renderCloud();}
+}).observe($('cloud'));
+$('search').addEventListener('input',render);
+['board','basics'].forEach(id=>$(id).addEventListener('change',render));
+document.querySelectorAll('[data-sort]').forEach(button=>button.addEventListener('click',()=>{
+ const key=button.dataset.sort;direction=key===sortKey?-direction:key==='card'?1:-1;sortKey=key;
+ document.querySelectorAll('#cards th').forEach(th=>th.removeAttribute('aria-sort'));
+ button.closest('th').setAttribute('aria-sort',direction===1?'ascending':'descending');render();
+}));
+render();
+</script>
+</body>
+</html>

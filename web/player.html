@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__PLAYER_NAME__ · Pauper Unwrapped</title>
+<style>__STYLES__</style>
+</head>
+<body>
+<main>
+<nav aria-label="Breadcrumb"><a href="__LEADERBOARD_URL__">League leaderboard</a> / Player profile · <a href="../cards.html">Card popularity</a></nav>
+<header>
+<div class="eyebrow" style="margin-top:28px">Pauper Unwrapped / 2026 league</div>
+<h1 class="profile-name">__PLAYER_NAME__ __TROPHIES__</h1>
+<p>__RECORD__ match record · __WIN_RATE__ match win rate</p>
+<div class="summary">__SUMMARY__</div>
+</header>
+<nav class="profile-nav" aria-label="Player sections"><a href="#decks">Decks played</a><a href="#player-cards">Card cloud</a><a href="#matchups">Matchups</a><a href="#opponents">Opponents</a><a href="#events">Event history</a></nav>
+<section id="decks" class="profile-section" aria-labelledby="decks-title">
+<h2 id="decks-title">Decks played</h2>
+<div class="table-wrap"><table class="profile-table"><thead><tr><th scope="col">Deck</th><th scope="col">Events</th><th scope="col">Match record</th><th scope="col">Game record</th><th scope="col">Match win%</th><th scope="col">Game win%</th></tr></thead><tbody>__DECK_ROWS__</tbody><tfoot>__DECK_TOTAL__</tfoot></table></div>
+</section>
+<section id="player-cards" class="profile-section" aria-labelledby="player-cards-title">
+<div class="toolbar"><h2 id="player-cards-title">__PLAYER_NAME__’s card cloud</h2><label for="card-search">Find a card<input type="search" id="card-search" placeholder="Card name…"></label></div>
+<p class="note">Card images are sized by total copies across this player’s captured decklists from completed events. Repeat registrations count again; a card in both boards counts as one deck, with its copies added together.</p>
+<p class="note" id="card-coverage"></p>
+<div class="card-filters">
+<label for="card-board">Count cards in <select id="card-board"><option value="all">Entire deck</option><option value="mainboard">Main deck</option><option value="sideboard">Sideboard</option></select></label>
+<label class="checkbox-label"><input type="checkbox" id="card-basics"> Include basic lands</label>
+<label for="card-limit">Show <select id="card-limit"><option value="60">Top 60 cards</option><option value="30">Top 30 cards</option><option value="all">All cards</option></select></label>
+</div>
+<p id="card-summary" class="note"></p>
+<div id="player-cloud" class="card-cloud"></div>
+<p id="player-cloud-detail" class="note" aria-live="polite"></p>
+<p class="note">Hover or focus for counts; select a card to open Scryfall. Images courtesy of <a href="https://scryfall.com">Scryfall</a>, © Wizards of the Coast. Images show representative printings. Sizes are relative to this player’s selection.</p>
+<noscript><p>Enable JavaScript to explore this player’s card cloud.</p></noscript>
+</section>
+<section id="matchups" class="profile-section" aria-labelledby="matchups-title">
+<h2 id="matchups-title">Matchups</h2>
+<label class="checkbox-label matchup-toggle"><input type="checkbox" id="matchup-show-self" checked aria-controls="matchup-chart"> Show self</label>
+<p class="note" id="matchups-description">One box per reported match, from __PLAYER_NAME__’s perspective. All players run left to right in league rank order, with __PLAYER_NAME__ marked “You”; boxes stack from oldest at the bottom to newest at the top. Byes are excluded. Hover or focus a box for event details.</p>
+<ul class="matchup-legend" aria-label="Match result colors">
+<li><span class="match-swatch win-close" aria-hidden="true"></span>2–1 / 1–0 win</li>
+<li><span class="match-swatch win-sweep" aria-hidden="true"></span>2–0 win</li>
+<li><span class="match-swatch loss-sweep" aria-hidden="true"></span>0–2 loss</li>
+<li><span class="match-swatch loss-close" aria-hidden="true"></span>1–2 / 0–1 loss</li>
+<li><span class="match-swatch draw" aria-hidden="true"></span>Draw</li>
+</ul>
+<div class="matchup-scroll" tabindex="0" role="region" aria-label="Matchup chart, scroll horizontally to see all opponents"><ol id="matchup-chart" class="matchup-chart" aria-describedby="matchups-description">__MATCHUP_ROWS__</ol></div>
+</section>
+<section id="opponents" class="profile-section" aria-labelledby="opponents-title">
+<h2 id="opponents-title">Opponents</h2>
+<p class="note">Head-to-head results from reported matches. Byes are excluded.</p>
+<div class="table-wrap"><table class="profile-table"><thead><tr><th scope="col">Opponent</th><th scope="col">Meetings</th><th scope="col">Match record</th><th scope="col">Game record</th></tr></thead><tbody>__OPPONENT_ROWS__</tbody></table></div>
+</section>
+<section id="events" class="profile-section" aria-labelledby="events-title">
+<h2 id="events-title">Event history</h2>
+<div class="table-wrap"><table class="profile-table"><thead><tr><th scope="col">Date</th><th scope="col" style="text-align:left">Deck</th><th scope="col">Place</th><th scope="col">Match record</th><th scope="col">Game record</th><th scope="col">Points</th></tr></thead><tbody>__EVENT_ROWS__</tbody></table></div>
+</section>
+<footer>Completed events only. Records are wins–losses–draws, from this player’s perspective. Deck and event records include awarded byes. 🏆 marks a 3–0 finish.</footer>
+</main>
+<script id="player-card-data" type="application/json">__CARD_DATA__</script>
+<script>
+__CLOUD_SCRIPT__
+const cardData=JSON.parse(document.getElementById('player-card-data').textContent);
+const $=id=>document.getElementById(id);
+function toggleMatchupSelf(){
+ const selfColumn=$('matchup-chart').querySelector('.matchup-self');
+ if(selfColumn) selfColumn.hidden=!$('matchup-show-self').checked;
+}
+$('matchup-show-self').addEventListener('change',toggleMatchupSelf);
+toggleMatchupSelf();
+const basics=new Set(cardData.basics);
+$('card-coverage').textContent=`Decklist coverage: ${cardData.coverage.captured} of ${cardData.coverage.entries} event entries captured.${cardData.coverage.missing.length?' Missing lists are excluded.':''}`;
+function renderPlayerCloud(){
+ const board=$('card-board').value, query=$('card-search').value.trim().toLowerCase();
+ const cards=cardData.boards[board].filter(c=>($('card-basics').checked||!basics.has(c.card))&&c.card.toLowerCase().includes(query));
+ const label={all:'Entire deck',mainboard:'Main deck',sideboard:'Sideboard'}[board];
+ $('card-summary').textContent=`${label} · ${cards.length} matching cards · ${cards.reduce((sum,c)=>sum+c.copies,0)} total copies`;
+ renderCardCloud(cards,$('card-limit').value,$('player-cloud'),$('player-cloud-detail'),cardData.images);
+}
+$('card-search').addEventListener('input',renderPlayerCloud);
+['card-board','card-basics','card-limit'].forEach(id=>$(id).addEventListener('change',renderPlayerCloud));
+let cloudWidth=0;
+new ResizeObserver(entries=>{
+ const width=Math.round(entries[0].contentRect.width);
+ if(width!==cloudWidth){cloudWidth=width;renderPlayerCloud();}
+}).observe($('player-cloud'));
+renderPlayerCloud();
+</script>
+</body>
+</html>

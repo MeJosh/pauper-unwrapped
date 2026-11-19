@@ -1,0 +1,29 @@
+3 Azorius Chancery
+1 Custodi Squire
+4 Dream Stalker
+1 Faith's Fetters
+4 Flicker of Fate
+1 Heliod's Pilgrim
+7 Island
+4 Journey to Nowhere
+1 Kabira Crossroads
+4 Kor Skyfisher
+1 Lonely Sandbar
+4 Mulldrifter
+3 Plains
+3 Preordain
+4 Reality Acid
+2 Sea Gate Oracle
+1 Secluded Steppe
+4 Spreading Seas
+4 Teferi's Time Twist
+4 Tranquil Cove
+
+SIDEBOARD:
+2 Circle of Protection: Red
+2 Counterspell
+2 Dispel
+4 Dust to Dust
+2 Hydroblast
+2 Relic of Progenitus
+1 Serrated Arrows

@@ -1,0 +1,24 @@
+4 Battle Screech
+1 Elite Interceptor
+1 Greatsword of Tyr
+3 Guardians' Pledge
+2 Idyllic Grange
+4 Kor Skyfisher
+4 Leonardo, Big Brother
+4 Lunarch Veteran
+4 Novice Inspector
+17 Plains
+3 Prismatic Strands
+4 Raffine's Informant
+1 Ramosian Rally
+1 Spider-Man, Web-Slinger
+3 Thraben Charm
+4 Thraben Inspector
+
+SIDEBOARD:
+2 Destroy Evil
+3 Martyr of Sands
+3 Obsidian Acolyte
+2 Revoke Existence
+3 Shattered Acolyte
+2 Standard Bearer
