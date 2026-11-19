@@ -30,7 +30,8 @@ a{color:var(--gold);text-underline-offset:4px}a:focus-visible{outline:3px solid 
 <section aria-labelledby="cards-title">
 <div class="toolbar"><h2 id="cards-title">Card popularity</h2><label for="search">Find a card<input type="search" id="search" placeholder="Card name…"></label></div>
 <div class="card-filters">
-<label for="board">Count cards in <select id="board"><option value="all">Entire deck</option><option value="mainboard">Main deck</option><option value="sideboard">Sideboard</option></select></label>
+<label id="table-board-filter" for="board">Count cards in <select id="board"><option value="all">Entire deck</option><option value="mainboard">Main deck</option><option value="sideboard">Sideboard</option></select></label>
+<label id="cloud-sideboards-filter" class="checkbox-label" hidden><input type="checkbox" id="cloud-sideboards" checked> Include sideboards</label>
 <label class="checkbox-label"><input type="checkbox" id="basics"> Include basic lands</label>
 </div>
 <div class="view-switch" role="group" aria-label="Card display">
@@ -132,7 +133,7 @@ function renderCloud(){
  if(view==='cloud')renderCardCloud(cloudCards,$('cloud-limit').value,$('cloud'),$('cloud-detail'),data.images);
 }
 function render(){
- const board=$('board').value, includeBasics=$('basics').checked, query=$('search').value.trim().toLowerCase();
+ const board=view==='cloud'?($('cloud-sideboards').checked?'all':'mainboard'):$('board').value, includeBasics=$('basics').checked, query=$('search').value.trim().toLowerCase();
  const cards=data.boards[board].filter(c=>includeBasics||!basics.has(c.card));
  let previousCount=null, rank=0;
  const ranked=cards.map((c,i)=>{
@@ -156,9 +157,11 @@ function setView(next){
  view=next;
  $('table-panel').hidden=view!=='table';
  $('cloud-panel').hidden=view!=='cloud';
+ $('table-board-filter').hidden=view!=='table';
+ $('cloud-sideboards-filter').hidden=view!=='cloud';
  $('table-view').setAttribute('aria-pressed',String(view==='table'));
  $('cloud-view').setAttribute('aria-pressed',String(view==='cloud'));
- renderCloud();
+ render();
 }
 $('table-view').addEventListener('click',()=>setView('table'));
 $('cloud-view').addEventListener('click',()=>setView('cloud'));
@@ -169,7 +172,7 @@ new ResizeObserver(entries=>{
  if(width!==cloudWidth){cloudWidth=width;renderCloud();}
 }).observe($('cloud'));
 $('search').addEventListener('input',render);
-['board','basics'].forEach(id=>$(id).addEventListener('change',render));
+['board','basics','cloud-sideboards'].forEach(id=>$(id).addEventListener('change',render));
 document.querySelectorAll('[data-sort]').forEach(button=>button.addEventListener('click',()=>{
  const key=button.dataset.sort;direction=key===sortKey?-direction:key==='card'?1:-1;sortKey=key;
  document.querySelectorAll('#cards th').forEach(th=>th.removeAttribute('aria-sort'));

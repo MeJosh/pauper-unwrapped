@@ -36,7 +36,7 @@ a{color:var(--gold);text-underline-offset:4px}a:focus-visible{outline:3px solid 
 <p class="note">Card images are sized by total copies across this player’s captured decklists from completed events. Repeat registrations count again; a card in both boards counts as one deck, with its copies added together.</p>
 <p class="note" id="card-coverage"></p>
 <div class="card-filters">
-<label for="card-board">Count cards in <select id="card-board"><option value="all">Entire deck</option><option value="mainboard">Main deck</option><option value="sideboard">Sideboard</option></select></label>
+<label class="checkbox-label"><input type="checkbox" id="card-sideboards" checked> Include sideboards</label>
 <label class="checkbox-label"><input type="checkbox" id="card-basics"> Include basic lands</label>
 <label for="card-limit">Show <select id="card-limit"><option value="60">Top 60 cards</option><option value="30">Top 30 cards</option><option value="all">All cards</option></select></label>
 </div>
@@ -140,14 +140,14 @@ toggleMatchupSelf();
 const basics=new Set(cardData.basics);
 $('card-coverage').textContent=`Decklist coverage: ${cardData.coverage.captured} of ${cardData.coverage.entries} event entries captured.${cardData.coverage.missing.length?' Missing lists are excluded.':''}`;
 function renderPlayerCloud(){
- const board=$('card-board').value, query=$('card-search').value.trim().toLowerCase();
+ const board=$('card-sideboards').checked?'all':'mainboard', query=$('card-search').value.trim().toLowerCase();
  const cards=cardData.boards[board].filter(c=>($('card-basics').checked||!basics.has(c.card))&&c.card.toLowerCase().includes(query));
  const label={all:'Entire deck',mainboard:'Main deck',sideboard:'Sideboard'}[board];
  $('card-summary').textContent=`${label} · ${cards.length} matching cards · ${cards.reduce((sum,c)=>sum+c.copies,0)} total copies`;
  renderCardCloud(cards,$('card-limit').value,$('player-cloud'),$('player-cloud-detail'),cardData.images);
 }
 $('card-search').addEventListener('input',renderPlayerCloud);
-['card-board','card-basics','card-limit'].forEach(id=>$(id).addEventListener('change',renderPlayerCloud));
+['card-sideboards','card-basics','card-limit'].forEach(id=>$(id).addEventListener('change',renderPlayerCloud));
 let cloudWidth=0;
 new ResizeObserver(entries=>{
  const width=Math.round(entries[0].contentRect.width);
