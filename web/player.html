@@ -8,7 +8,7 @@
 </head>
 <body>
 <main>
-<nav aria-label="Breadcrumb"><a href="__LEADERBOARD_URL__">League leaderboard</a> / Player profile · <a href="../cards.html">Card popularity</a></nav>
+<nav aria-label="Breadcrumb"><a href="__LEADERBOARD_URL__">League leaderboard</a> / Player profile · <a href="../cards.html">Card popularity</a> · <a href="../matchups.html">All matchups</a></nav>
 <header>
 <div class="eyebrow" style="margin-top:28px">Pauper Unwrapped / 2026 league</div>
 <h1 class="profile-name">__PLAYER_NAME__ __TROPHIES__</h1>
@@ -38,15 +38,7 @@
 <section id="matchups" class="profile-section" aria-labelledby="matchups-title">
 <h2 id="matchups-title">Matchups</h2>
 <label class="checkbox-label matchup-toggle"><input type="checkbox" id="matchup-show-self" checked aria-controls="matchup-chart"> Show self</label>
-<p class="note" id="matchups-description">One box per reported match, from __PLAYER_NAME__’s perspective. All players run left to right in league rank order, with __PLAYER_NAME__ marked “You”; boxes stack from oldest at the bottom to newest at the top. Byes are excluded. Hover or focus a box for event details.</p>
-<ul class="matchup-legend" aria-label="Match result colors">
-<li><span class="match-swatch win-close" aria-hidden="true"></span>2–1 / 1–0 win</li>
-<li><span class="match-swatch win-sweep" aria-hidden="true"></span>2–0 win</li>
-<li><span class="match-swatch loss-sweep" aria-hidden="true"></span>0–2 loss</li>
-<li><span class="match-swatch loss-close" aria-hidden="true"></span>1–2 / 0–1 loss</li>
-<li><span class="match-swatch draw" aria-hidden="true"></span>Draw</li>
-</ul>
-<div class="matchup-scroll" tabindex="0" role="region" aria-label="Matchup chart, scroll horizontally to see all opponents"><ol id="matchup-chart" class="matchup-chart" aria-describedby="matchups-description">__MATCHUP_ROWS__</ol></div>
+__MATCHUP_CHART__
 </section>
 <section id="opponents" class="profile-section" aria-labelledby="opponents-title">
 <h2 id="opponents-title">Opponents</h2>

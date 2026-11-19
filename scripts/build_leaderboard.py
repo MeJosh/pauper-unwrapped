@@ -46,7 +46,7 @@ def build_player_card_data(player, analysis, images):
     return build_card_data(entries, coverage, images, '../')
 
 
-def render_matchups(player):
+def render_matchups(player, profile_prefix=''):
     rows = []
     for opponent in player['matchups']:
         boxes = []
@@ -71,11 +71,32 @@ def render_matchups(player):
                    ''.join(boxes) or '<span class="matchup-unplayed">No matches</span>')
         column_class = 'matchup-column matchup-self' if is_self else 'matchup-column'
         rows.append(
-            f'<li class="{column_class}"><div class="matchup-results">{results}</div><a class="matchup-player" href="{opponent["id"]}.html">'
+            f'<li class="{column_class}"><div class="matchup-results">{results}</div><a class="matchup-player" href="{profile_prefix}{opponent["id"]}.html">'
             f'<span class="rank">#{opponent["rank"]}</span> {escape(opponent["name"])}</a>'
             f'</li>'
         )
     return ''.join(rows) or '<li class="empty">No league opponents yet.</li>'
+
+
+def render_matchup_chart(player, chart_id='matchup-chart', profile_prefix=''):
+    template = (ROOT / 'web/matchup-chart.html').read_text(encoding='utf-8')
+    values = {
+        'PLAYER_NAME': escape(player['name']), 'CHART_ID': escape(chart_id, quote=True),
+        'MATCHUP_ROWS': render_matchups(player, profile_prefix),
+    }
+    return re.sub(r'__([A-Z_]+)__', lambda match: values[match[1]], template)
+
+
+def render_all_matchups(players):
+    # Profiles arrive in the same season order used by the leaderboard, including ties.
+    return ''.join(
+        f'<section class="profile-section" aria-labelledby="player-{player["id"]}-title">'
+        f'<h2 id="player-{player["id"]}-title"><span class="rank">#{player["rank"]}</span> '
+        f'<a href="players/{player["id"]}.html">{escape(player["name"])}</a> {trophy(player["trophies"])}</h2>'
+        f'<p class="note">{player["points"]} match points · {record(player["matchRecord"])} match record</p>'
+        f'{render_matchup_chart(player, "matchup-{}".format(player["id"]), "players/")}</section>'
+        for player in players
+    ) or '<p class="empty">No completed league events yet.</p>'
 
 
 def render_profile(player, template, styles, leaderboard_url, card_data, cloud_script):
@@ -114,7 +135,7 @@ def render_profile(player, template, styles, leaderboard_url, card_data, cloud_s
             f'<td>{player["matchWinRate"]:.1%}</td><td>{player["gameWinRate"]:.1%}</td></tr>'
         ),
         'OPPONENT_ROWS': opponents, 'EVENT_ROWS': events,
-        'MATCHUP_ROWS': render_matchups(player),
+        'MATCHUP_CHART': render_matchup_chart(player),
         'CARD_DATA': json.dumps(card_data, ensure_ascii=False).replace('<', '\\u003c'),
         'CLOUD_SCRIPT': cloud_script,
     }
@@ -142,6 +163,11 @@ def main():
     if args.output.parent.resolve() != ROOT and (ROOT / 'assets/cards').is_dir():
         shutil.copytree(ROOT / 'assets/cards', args.output.parent / 'assets/cards', dirs_exist_ok=True)
     args.output.write_text(template.replace('__STYLES__', styles).replace("__LEAGUE_DATA__", data), encoding="utf-8")
+    matchup_template = (ROOT / 'web/matchups.html').read_text(encoding='utf-8')
+    (args.output.parent / 'matchups.html').write_text(
+        matchup_template.replace('__STYLES__', styles)
+        .replace('__LEADERBOARD_URL__', escape(quote(args.output.name), quote=True))
+        .replace('__MATCHUP_CARDS__', render_all_matchups(players)), encoding='utf-8')
     card_template = (ROOT / 'web/cards.html').read_text(encoding='utf-8')
     card_json = json.dumps(card_data, ensure_ascii=False).replace('<', '\\u003c')
     (args.output.parent / 'cards.html').write_text(
@@ -155,7 +181,7 @@ def main():
         (profile_dir / f'{player["id"]}.html').write_text(
             render_profile(player, profile_template, styles, '../' + quote(args.output.name),
                            build_player_card_data(player, analysis, images), cloud_script), encoding='utf-8')
-    print(f"Built {args.output}, cards.html, and {len(players)} player pages in {profile_dir}")
+    print(f"Built {args.output}, cards.html, matchups.html, and {len(players)} player pages in {profile_dir}")
 
 
 if __name__ == "__main__":

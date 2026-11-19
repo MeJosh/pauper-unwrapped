@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All matchups · Pauper Unwrapped</title>
+<style>__STYLES__</style>
+</head>
+<body>
+<main>
+<nav class="profile-nav" aria-label="League pages"><a href="__LEADERBOARD_URL__">← League leaderboard</a><a href="cards.html">Card popularity</a></nav>
+<header>
+<div class="eyebrow">Pauper Unwrapped / 2026 league</div>
+<h1>All matchups</h1>
+<p>Every player’s matchup chart, in season placement order. Rankings match the league leaderboard: match points, then match win percentage and game win percentage.</p>
+</header>
+<div class="toolbar"><label class="checkbox-label"><input type="checkbox" id="matchup-show-self" checked aria-controls="matchup-cards"> Show self on every chart</label></div>
+<div id="matchup-cards">__MATCHUP_CARDS__</div>
+<footer>Completed events only. Each chart shows results from the named player’s perspective, so each match appears on both players’ charts. Byes are excluded.</footer>
+</main>
+<script>
+const showSelf=document.getElementById('matchup-show-self');
+function toggleMatchupSelf(){
+ document.querySelectorAll('.matchup-self').forEach(column=>{column.hidden=!showSelf.checked;});
+}
+showSelf.addEventListener('change',toggleMatchupSelf);
+toggleMatchupSelf();
+</script>
+</body>
+</html>
